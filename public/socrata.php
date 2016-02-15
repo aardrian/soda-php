@@ -52,6 +52,9 @@ class Socrata {
 
     // Time for some cURL magic...
     $handle = curl_init();
+    // Disable SSL
+    curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+
     curl_setopt($handle, CURLOPT_URL, $full_url);
     curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
@@ -67,13 +70,17 @@ class Socrata {
 
   // Convenience function for GET calls
   public function get($path, $params = array()) {
-
     $handle = $this->create_curl_handle($path, $params);
 
     $response = curl_exec($handle);
     $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
     if($code != "200") {
       echo "Error \"$code\" from server: $response";
+      // Display more verbose/useful errors
+      if(curl_exec($handle) === false)
+		{
+		    echo '<br>Curl error: ' . curl_error($handle);
+		}
       die();
     }
 
